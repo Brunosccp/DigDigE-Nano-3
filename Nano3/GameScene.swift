@@ -15,6 +15,8 @@ private var rightTrigger: SKSpriteNode!
 private var wrongTrigger: SKSpriteNode!
 
 private var isCorrect = false
+private var deleteBall = false
+
 private var scoreLabel: SKLabelNode!
 private var timesencond = 0
 
@@ -63,7 +65,7 @@ class GameScene: SKScene {
             if(isCorrect == true){  //caso esteja correto
                 print("CORRECT")
                 isCorrect = false
-                
+                deleteBall = true
                 
                 
             }else{  //caso não esteja correto
@@ -102,8 +104,12 @@ extension GameScene : SKPhysicsContactDelegate{
             isCorrect = true
         }
         if(bodyA == wrongCategory){
+            if(deleteBall == true){ //checando se foi acertado e, se sim, apagando a bola
+                contact.bodyB.node?.removeFromParent()
+                deleteBall = false
+            }
             isCorrect = false
-            contact.bodyB.node?.removeFromParent()
+            
         }
     }
 }
