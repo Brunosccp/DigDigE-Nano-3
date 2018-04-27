@@ -14,6 +14,8 @@ private var pandeiro: SKSpriteNode!
 private var rightTrigger: SKSpriteNode!
 private var wrongTrigger: SKSpriteNode!
 
+//private var filaNotas: [(SKSpriteNode, Bool)]
+
 private var isCorrect = false
 private var deleteBall = false
 
@@ -76,7 +78,6 @@ class GameScene: SKScene {
     func startMusic(){
         var int : Double = 0
         
-        
         int += 1
         createNote(interval: int, type: "note1")
         int += 0.5
@@ -94,6 +95,7 @@ class GameScene: SKScene {
     func createNote(interval: Double, type: String){
         var timer = Timer()
         
+
         timer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(showNote), userInfo: type, repeats: false)
     }
     
@@ -128,7 +130,7 @@ extension GameScene : SKPhysicsContactDelegate{
         let bodyB = contact.bodyB.categoryBitMask
         
         if(bodyA == rightCategory){
-            isCorrect = true
+            contact.bodyB.node?.isCorrect = true
         }
         if(bodyA == wrongCategory){
             if(deleteBall == true){ //checando se foi acertado e, se sim, apagando a bola
@@ -137,6 +139,16 @@ extension GameScene : SKPhysicsContactDelegate{
             }
             isCorrect = false
             
+        }
+    }
+}
+extension SKNode{
+    public var isCorrect : Bool{
+        get{
+            return isCorrect
+        }
+        set{
+            isCorrect = newValue
         }
     }
 }
