@@ -9,7 +9,6 @@
 import SpriteKit
 import GameplayKit
 
-private var note: SKSpriteNode!
 private var circle: SKSpriteNode!
 private var pandeiro: SKSpriteNode!
 private var rightTrigger: SKSpriteNode!
@@ -23,30 +22,28 @@ private var noteCategory: UInt32 = 0x1 << 1
 private var rightCategory: UInt32 = 0x1 << 3
 private var wrongCategory: UInt32 = 0x1 << 4
 
+private var path = UIBezierPath()
+
+var timer = Timer()
+
 class GameScene: SKScene {
     override func didMove(to view: SKView) {
-        //associando as variaveis com o gameScene
-        note = childNode(withName: "nota") as! SKSpriteNode
-        
-        
         
         pandeiro = childNode(withName: "pandeiro") as! SKSpriteNode
         rightTrigger = childNode(withName: "rightTrigger") as! SKSpriteNode
         wrongTrigger = childNode(withName: "wrongTrigger") as! SKSpriteNode
         
         //criando o caminho da bola caminhante
-        let path = UIBezierPath()
         path.move(to: CGPoint(x: 0, y: 0))
         path.addLine(to: CGPoint(x: -1000, y: 0))
         
         //ligando os sprites com as categorias de colisão
-        note.physicsBody?.categoryBitMask = noteCategory
         rightTrigger.physicsBody?.categoryBitMask = rightCategory
         wrongTrigger.physicsBody?.categoryBitMask = wrongCategory
         
-        note.physicsBody?.contactTestBitMask = rightCategory | wrongCategory
+        rightTrigger.physicsBody?.contactTestBitMask = noteCategory
+        wrongTrigger.physicsBody?.contactTestBitMask = noteCategory
         
-        note.physicsBody?.collisionBitMask = 0
         rightTrigger.physicsBody?.collisionBitMask = 0
         wrongTrigger.physicsBody?.collisionBitMask = 0
         
@@ -54,33 +51,59 @@ class GameScene: SKScene {
         
         //ligando a movimentação da bola caminhante com o caminho
         let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: true, speed: 180)
-        note.run(move)
+        
+        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(createNotes), userInfo: nil, repeats: true)
         
         self.physicsWorld.contactDelegate = self
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch:UITouch = touches.first!
+        //verificando se o toque está certo ou não
         if(pandeiro.contains(touch.location(in: self))){
-            if(isCorrect == true){
+            if(isCorrect == true){  //caso esteja correto
                 print("CORRECT")
                 isCorrect = false
-            }else{
+                
+                
+                
+            }else{  //caso não esteja correto
                 print("WRONG")
             }
         }
+    }
+    @objc func createNotes(){
+        let note1 : SKSpriteNode = SKSpriteNode(imageNamed: "png_bolafut")
+        note1.size = CGSize(width: 108.308, height: 108.308)
+        note1.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        note1.position = CGPoint(x: 175.937, y: 81.713)
+        note1.zPosition = 0
+        
+        note1.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: note1.size.width, height: note1.size.height))
+        note1.physicsBody?.categoryBitMask = noteCategory
+        note1.physicsBody?.collisionBitMask = 0
+        note1.physicsBody?.isDynamic = true
+        note1.physicsBody?.affectedByGravity = false
+        note1.physicsBody?.pinned = false
+        
+        let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: true, speed: 180)
+        note1.run(move)
+        
+        self.addChild(note1)
+        
+        self.physicsWorld.contactDelegate = self
     }
 }
 extension GameScene : SKPhysicsContactDelegate{
     func didBegin(_ contact: SKPhysicsContact){
         let bodyA = contact.bodyA.categoryBitMask
-        //let bodyB = contact.bodyB.categoryBitMask
+        let bodyB = contact.bodyB.categoryBitMask
         
         if(bodyA == rightCategory){
             isCorrect = true
         }
         if(bodyA == wrongCategory){
             isCorrect = false
+            contact.bodyB.node?.removeFromParent()
         }
     }
-    
 }
