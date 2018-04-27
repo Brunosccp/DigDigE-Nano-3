@@ -26,11 +26,10 @@ private var wrongCategory: UInt32 = 0x1 << 4
 
 private var path = UIBezierPath()
 
-var timer = Timer()
 
 class GameScene: SKScene {
     override func didMove(to view: SKView) {
-        
+        //pegando as settings definidas no Gamescene
         pandeiro = childNode(withName: "pandeiro") as! SKSpriteNode
         rightTrigger = childNode(withName: "rightTrigger") as! SKSpriteNode
         wrongTrigger = childNode(withName: "wrongTrigger") as! SKSpriteNode
@@ -54,7 +53,7 @@ class GameScene: SKScene {
         //ligando a movimentação da bola caminhante com o caminho
         let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: true, speed: 180)
         
-        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(createNotes), userInfo: nil, repeats: true)
+        startMusic()
         
         self.physicsWorld.contactDelegate = self
     }
@@ -73,8 +72,35 @@ class GameScene: SKScene {
             }
         }
     }
-    @objc func createNotes(){
+    
+    func startMusic(){
+        var int : Double = 0
+        
+        
+        int += 1
+        createNote(interval: int, type: "note1")
+        int += 0.5
+        createNote(interval: int, type: "note1")
+        int += 1
+        createNote(interval: int, type: "note1")
+        int += 0.25
+        createNote(interval: int, type: "note1")
+        int += 0.25
+        createNote(interval: int, type: "note1")
+        int += 0.25
+        createNote(interval: int, type: "note1")
+        
+    }
+    func createNote(interval: Double, type: String){
+        var timer = Timer()
+        
+        timer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(showNote), userInfo: type, repeats: false)
+    }
+    
+    @objc func showNote(sender: Timer){
+        
         let note1 : SKSpriteNode = SKSpriteNode(imageNamed: "png_bolafut")
+        note1.name = sender.userInfo! as! String
         note1.size = CGSize(width: 108.308, height: 108.308)
         note1.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         note1.position = CGPoint(x: 175.937, y: 81.713)
@@ -91,6 +117,7 @@ class GameScene: SKScene {
         note1.run(move)
         
         self.addChild(note1)
+        //print(note1.name)
         
         self.physicsWorld.contactDelegate = self
     }
