@@ -17,6 +17,7 @@ private var wrongTrigger: SKSpriteNode!
 //private var filaNotas: [(SKSpriteNode, Bool)]
 
 private var isCorrect = false
+private var correctNote : [(SKNode, Bool)] = []
 private var deleteBall = false
 
 private var scoreLabel: SKLabelNode!
@@ -63,11 +64,11 @@ class GameScene: SKScene {
         let touch:UITouch = touches.first!
         //verificando se o toque está certo ou não
         if(pandeiro.contains(touch.location(in: self))){
-            if(isCorrect == true){  //caso esteja correto
+            let t  = correctNote.first
+            if(t != nil && t!.1 == true){  //caso esteja correto
                 print("CORRECT")
-                isCorrect = false
-                deleteBall = true
-                
+                t!.0.removeFromParent()
+                correctNote.removeFirst()
                 
             }else{  //caso não esteja correto
                 print("WRONG")
@@ -78,25 +79,19 @@ class GameScene: SKScene {
     func startMusic(){
         var int : Double = 0
         
-        int += 1
-        createNote(interval: int, type: "note1")
-        int += 0.5
-        createNote(interval: int, type: "note1")
-        int += 1
-        createNote(interval: int, type: "note1")
-        int += 0.25
-        createNote(interval: int, type: "note1")
-        int += 0.25
-        createNote(interval: int, type: "note1")
-        int += 0.25
-        createNote(interval: int, type: "note1")
+        createNote(interval: 1, type: "note1", &int)
+        createNote(interval: 0.5, type: "note1", &int)
+        createNote(interval: 1, type: "note1", &int)
+        createNote(interval: 0.25, type: "note1", &int)
+        createNote(interval: 0.25, type: "note1", &int)
+        createNote(interval: 0.25, type: "note1", &int)
         
     }
-    func createNote(interval: Double, type: String){
+    func createNote(interval: Double, type: String,_ int: inout Double){
         var timer = Timer()
-        
+        int += interval
 
-        timer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(showNote), userInfo: type, repeats: false)
+        timer = Timer.scheduledTimer(timeInterval: int, target: self, selector: #selector(showNote), userInfo: type, repeats: false)
     }
     
     @objc func showNote(sender: Timer){
@@ -127,28 +122,12 @@ class GameScene: SKScene {
 extension GameScene : SKPhysicsContactDelegate{
     func didBegin(_ contact: SKPhysicsContact){
         let bodyA = contact.bodyA.categoryBitMask
-        let bodyB = contact.bodyB.categoryBitMask
         
         if(bodyA == rightCategory){
-            contact.bodyB.node?.isCorrect = true
+            correctNote.append((contact.bodyB.node!, true))
         }
         if(bodyA == wrongCategory){
-            if(deleteBall == true){ //checando se foi acertado e, se sim, apagando a bola
-                contact.bodyB.node?.removeFromParent()
-                deleteBall = false
-            }
-            isCorrect = false
-            
-        }
-    }
-}
-extension SKNode{
-    public var isCorrect : Bool{
-        get{
-            return isCorrect
-        }
-        set{
-            isCorrect = newValue
+            correctNote.removeFirst()
         }
     }
 }
