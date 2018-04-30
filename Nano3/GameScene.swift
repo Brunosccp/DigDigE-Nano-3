@@ -14,11 +14,7 @@ private var pandeiro: SKSpriteNode!
 private var rightTrigger: SKSpriteNode!
 private var wrongTrigger: SKSpriteNode!
 
-//private var filaNotas: [(SKSpriteNode, Bool)]
-
-private var isCorrect = false
 private var correctNote : [(SKNode, Bool)] = []
-private var deleteBall = false
 
 private var scoreLabel: SKLabelNode!
 private var timesencond = 0
@@ -34,7 +30,6 @@ class GameScene: SKScene {
     override func didMove(to view: SKView) {
         self.backgroundColor = hexStringToUIColor(hex: "#ecc21b")
         
-        print(self.size.width)
         
         //pegando as settings definidas no Gamescene
         pandeiro = childNode(withName: "pandeiro") as! SKSpriteNode
@@ -55,10 +50,6 @@ class GameScene: SKScene {
         rightTrigger.physicsBody?.collisionBitMask = 0
         wrongTrigger.physicsBody?.collisionBitMask = 0
         
-        
-        
-        //ligando a movimentação da bola caminhante com o caminho
-        let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: true, speed: 180)
         
         startMusic()
         
@@ -100,11 +91,11 @@ class GameScene: SKScene {
     
     @objc func showNote(sender: Timer){
         
-        let note1 : SKSpriteNode = SKSpriteNode(imageNamed: "png_bolafut")
+        let note1 : SKSpriteNode = SKSpriteNode(imageNamed: "nota1")
         note1.name = sender.userInfo! as! String
-        note1.size = CGSize(width: 108.308, height: 108.308)
+        note1.size = CGSize(width: 64, height: 64)
         note1.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        note1.position = CGPoint(x: 175.937, y: 81.713)
+        note1.position = CGPoint(x: 370, y: 37)
         note1.zPosition = 0
         
         note1.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: note1.size.width, height: note1.size.height))
@@ -114,6 +105,7 @@ class GameScene: SKScene {
         note1.physicsBody?.affectedByGravity = false
         note1.physicsBody?.pinned = false
         
+        //ligando a movimentação da bola caminhante com o caminho
         let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: true, speed: 180)
         note1.run(move)
         
