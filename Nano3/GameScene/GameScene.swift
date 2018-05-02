@@ -11,6 +11,7 @@ import GameplayKit
 
 private var circle: SKSpriteNode!
 private var pandeiro: SKSpriteNode!
+private var pandeiro2: SKSpriteNode!
 private var internalPandeiro: SKShapeNode!
 private var rightTrigger: SKSpriteNode!
 private var wrongTrigger: SKSpriteNode!
@@ -39,18 +40,22 @@ class GameScene: SKScene {
         
         //pegando as settings definidas no Gamescene
         pandeiro = childNode(withName: "pandeiro") as! SKSpriteNode
+        pandeiro2 = childNode(withName: "pandeiro2") as! SKSpriteNode
         rightTrigger = childNode(withName: "rightTrigger") as! SKSpriteNode
         wrongTrigger = childNode(withName: "wrongTrigger") as! SKSpriteNode
         scoreLabel = childNode(withName: "score") as! SKLabelNode
-        createPandeiroRegions()
+        //createPandeiroRegions()
         
         //criando o caminho da bola caminhante
         path.move(to: CGPoint(x: 0, y: 0))
         path.addLine(to: CGPoint(x: -1000, y: 0))
         
+        //resetando scores e multipliers
+        score = 0
+        multiplier = 1
+        multiplierCounter = 0
         
         //settando labels
-        score = 0
         scoreLabel.text = "\(score)"
         
         //ligando os sprites com as categorias de colisão
@@ -71,12 +76,11 @@ class GameScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch:UITouch = touches.first!
         //verificando se o toque está certo ou não
-        let internalRegion = internalPandeiro.contains(touch.location(in: self))
+        //let internalRegion = internalPandeiro.contains(touch.location(in: self))
         let pandeiroRegion = pandeiro.contains(touch.location(in: self))
+        let pandeiro2Region = pandeiro2.contains(touch.location(in: self))
         
-        if(internalRegion){
-            print("BATEU NO INTERNO")
-            
+        if(pandeiroRegion){
             let t  = currentNote.first
             if(t != nil && t!.1 == true && t!.0.name! == "note1"){  //caso esteja correto
                 print("CORRECT, \(t!.0.name!)")
@@ -92,10 +96,7 @@ class GameScene: SKScene {
                 updateMultiplier(rightNote: false)
             }
         }
-        else if(pandeiroRegion){
-            print("REGIAO DO CANTO")
-            
-            
+        else if(pandeiro2Region){
             let t  = currentNote.first
             if(t != nil && t!.1 == true && t!.0.name! == "note2"){  //caso esteja correto
                 print("CORRECT")
@@ -113,16 +114,6 @@ class GameScene: SKScene {
         }
     }
     
-    func createPandeiroRegions(){
-        internalPandeiro = SKShapeNode(circleOfRadius: 60)
-        internalPandeiro.position = CGPoint(x: 2, y: -93)
-        internalPandeiro.glowWidth = 1.0
-        internalPandeiro.strokeColor = .black
-        internalPandeiro.fillColor = .black
-        internalPandeiro.zPosition = 10
-        
-        self.addChild(internalPandeiro)
-    }
     func startMusic(){
         var int : Double = 1
         
