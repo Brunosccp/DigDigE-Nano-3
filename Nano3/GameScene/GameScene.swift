@@ -8,19 +8,22 @@
 
 import SpriteKit
 import GameplayKit
+import AVFoundation
 
 private var circle: SKSpriteNode!
 private var pandeiro: SKSpriteNode!
 private var pandeiro2: SKSpriteNode!
-private var internalPandeiro: SKShapeNode!
 private var rightTrigger: SKSpriteNode!
 private var wrongTrigger: SKSpriteNode!
 
 private var currentNote : [(SKNode, Bool)] = []
 
+var sound = SKAction.playSoundFileNamed("dancaDaVassoura.mp3", waitForCompletion: false)
+
 private var score: Int = 0
 private var multiplier: Int = 1
 private var multiplierCounter = 0
+private var firstNote = true
 
 private var scoreLabel: SKLabelNode!
 private var multiplierLabel: SKLabelNode!
@@ -41,6 +44,8 @@ class GameScene: SKScene {
         //pegando as settings definidas no Gamescene
         pandeiro = childNode(withName: "pandeiro") as! SKSpriteNode
         pandeiro2 = childNode(withName: "pandeiro2") as! SKSpriteNode
+        pandeiro2.xScale *= -1
+        
         rightTrigger = childNode(withName: "rightTrigger") as! SKSpriteNode
         wrongTrigger = childNode(withName: "wrongTrigger") as! SKSpriteNode
         scoreLabel = childNode(withName: "score") as! SKLabelNode
@@ -76,7 +81,6 @@ class GameScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch:UITouch = touches.first!
         //verificando se o toque está certo ou não
-        //let internalRegion = internalPandeiro.contains(touch.location(in: self))
         let pandeiroRegion = pandeiro.contains(touch.location(in: self))
         let pandeiro2Region = pandeiro2.contains(touch.location(in: self))
         
@@ -113,9 +117,12 @@ class GameScene: SKScene {
             }
         }
     }
+
     
     func startMusic(){
         var int : Double = 1
+        
+        //run(sound)
         
         createNote(interval: 1, type: "note2", &int)
         createNote(interval: 0.5, type: "note1", &int)
@@ -124,19 +131,16 @@ class GameScene: SKScene {
         createNote(interval: 0.25, type: "note1", &int)
         createNote(interval: 0.25, type: "note1", &int)
         
-        
         //mostrando tela final
         int += 10
         Timer.scheduledTimer(timeInterval: int, target: self, selector: #selector(showEndScene), userInfo: nil, repeats: false)
     }
     func createNote(interval: Double, type: String,_ int: inout Double){
-        var timer = Timer()
         int += interval
 
-        timer = Timer.scheduledTimer(timeInterval: int, target: self, selector: #selector(showNote), userInfo: type, repeats: false)
+        Timer.scheduledTimer(timeInterval: int, target: self, selector: #selector(showNote), userInfo: type, repeats: false)
     }
     @objc func showNote(sender: Timer){
-        
         
         let imageName = sender.userInfo as? String
         let note1 : SKSpriteNode = SKSpriteNode(imageNamed: imageName!)
@@ -187,6 +191,7 @@ class GameScene: SKScene {
         view?.presentScene(endScene, transition: reveal)
     }
     
+    
     func hexStringToUIColor (hex:String) -> UIColor {
         //retirei da internet pronto
         var cString:String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
@@ -209,7 +214,6 @@ class GameScene: SKScene {
             alpha: CGFloat(1.0)
         )
     }
-    
 }
 extension GameScene : SKPhysicsContactDelegate{
     func didBegin(_ contact: SKPhysicsContact){
@@ -217,6 +221,11 @@ extension GameScene : SKPhysicsContactDelegate{
         
         if(bodyA == rightCategory){ //quando a bola bate no primeiro retangulo invisivel
             currentNote.append((contact.bodyB.node!, true))
+            if(firstNote == true){
+                run(sound)
+                firstNote = false
+            }
+            
         }
         if(bodyA == wrongCategory){ //quando a bola bate no segundo retangulo invisivel
             currentNote.removeFirst()
