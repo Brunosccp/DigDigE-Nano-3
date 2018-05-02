@@ -16,6 +16,10 @@ private var wrongTrigger: SKSpriteNode!
 
 private var currentNote : [(SKNode, Bool)] = []
 
+private var score: Int = 0
+private var multiplier: Int = 1
+private var multiplierCounter = 0
+
 private var scoreLabel: SKLabelNode!
 private var multiplierLabel: SKLabelNode!
 
@@ -36,13 +40,15 @@ class GameScene: SKScene {
         pandeiro = childNode(withName: "pandeiro") as! SKSpriteNode
         rightTrigger = childNode(withName: "rightTrigger") as! SKSpriteNode
         wrongTrigger = childNode(withName: "wrongTrigger") as! SKSpriteNode
+        scoreLabel = childNode(withName: "score") as! SKLabelNode
         
         //criando o caminho da bola caminhante
         path.move(to: CGPoint(x: 0, y: 0))
         path.addLine(to: CGPoint(x: -1000, y: 0))
         
-        //settando labels
         
+        //settando labels
+        scoreLabel.text = "\(score)"
         
         //ligando os sprites com as categorias de colisão
         rightTrigger.physicsBody?.categoryBitMask = rightCategory
@@ -69,8 +75,13 @@ class GameScene: SKScene {
                 t!.0.removeFromParent()
                 currentNote.removeFirst()
                 
+                updateMultiplier(rightNote: true)
+                score += 50 * multiplier
+                scoreLabel.text = "\(score)"
+                
             }else{  //caso não esteja correto
                 print("WRONG")
+                updateMultiplier(rightNote: false)
             }
         }
     }
@@ -121,6 +132,31 @@ class GameScene: SKScene {
         
         self.physicsWorld.contactDelegate = self
     }
+    func updateMultiplier(rightNote: Bool){
+        if(rightNote == true){  //a nota tocada foi correta
+            if(multiplierCounter < 9){  //se não está na hora de incrementar o multiplier
+                multiplierCounter += 1
+            }
+            else{   //se está na hora de incrementar o multiplayer
+                if(multiplier < 4){ //caso o multiplier já não esteja em 4 (o mult máximo no caso)
+                    multiplier += 1
+                    multiplierCounter = 0
+                }
+                else{return}
+            }
+        }
+        else{   //a nota tocada nao foi correta
+            multiplier = 1
+            multiplierCounter = 0
+        }
+    }
+    @objc func showEndScene(){
+        guard let endScene = SKScene(fileNamed: "EndScene") else{return}
+        endScene.scaleMode = .aspectFit
+        let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
+        view?.presentScene(endScene, transition: reveal)
+    }
+    
     func hexStringToUIColor (hex:String) -> UIColor {
         //retirei da internet pronto
         var cString:String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
@@ -142,12 +178,6 @@ class GameScene: SKScene {
             blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
             alpha: CGFloat(1.0)
         )
-    }
-    @objc func showEndScene(){
-        guard let endScene = SKScene(fileNamed: "EndScene") else{return}
-        endScene.scaleMode = .aspectFit
-        let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
-        view?.presentScene(endScene, transition: reveal)
     }
     
 }
