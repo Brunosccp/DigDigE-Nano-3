@@ -50,6 +50,7 @@ class GameScene: SKScene {
         
         
         //settando labels
+        score = 0
         scoreLabel.text = "\(score)"
         
         //ligando os sprites com as categorias de colisão
@@ -77,8 +78,8 @@ class GameScene: SKScene {
             print("BATEU NO INTERNO")
             
             let t  = currentNote.first
-            if(t != nil && t!.1 == true){  //caso esteja correto
-                print("CORRECT")
+            if(t != nil && t!.1 == true && t!.0.name! == "note1"){  //caso esteja correto
+                print("CORRECT, \(t!.0.name!)")
                 t!.0.removeFromParent()
                 currentNote.removeFirst()
                 
@@ -96,7 +97,7 @@ class GameScene: SKScene {
             
             
             let t  = currentNote.first
-            if(t != nil && t!.1 == true){  //caso esteja correto
+            if(t != nil && t!.1 == true && t!.0.name! == "note2"){  //caso esteja correto
                 print("CORRECT")
                 t!.0.removeFromParent()
                 currentNote.removeFirst()
@@ -125,7 +126,7 @@ class GameScene: SKScene {
     func startMusic(){
         var int : Double = 1
         
-        createNote(interval: 1, type: "note1", &int)
+        createNote(interval: 1, type: "note2", &int)
         createNote(interval: 0.5, type: "note1", &int)
         createNote(interval: 1, type: "note1", &int)
         createNote(interval: 0.25, type: "note1", &int)
@@ -145,8 +146,11 @@ class GameScene: SKScene {
     }
     @objc func showNote(sender: Timer){
         
-        let note1 : SKSpriteNode = SKSpriteNode(imageNamed: "nota1")
-        note1.name = sender.userInfo! as! String
+        print(sender.userInfo! as! String)
+        
+        _ = sender.userInfo as? String
+        let note1 : SKSpriteNode = SKSpriteNode(imageNamed: "note1")
+        note1.name = sender.userInfo as? String
         note1.size = CGSize(width: 64, height: 64)
         note1.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         note1.position = CGPoint(x: 370, y: 37)
