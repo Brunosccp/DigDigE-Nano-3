@@ -11,6 +11,7 @@ import GameplayKit
 
 private var circle: SKSpriteNode!
 private var pandeiro: SKSpriteNode!
+private var internalPandeiro: SKShapeNode!
 private var rightTrigger: SKSpriteNode!
 private var wrongTrigger: SKSpriteNode!
 
@@ -41,6 +42,7 @@ class GameScene: SKScene {
         rightTrigger = childNode(withName: "rightTrigger") as! SKSpriteNode
         wrongTrigger = childNode(withName: "wrongTrigger") as! SKSpriteNode
         scoreLabel = childNode(withName: "score") as! SKLabelNode
+        createPandeiroRegions()
         
         //criando o caminho da bola caminhante
         path.move(to: CGPoint(x: 0, y: 0))
@@ -68,7 +70,31 @@ class GameScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch:UITouch = touches.first!
         //verificando se o toque está certo ou não
-        if(pandeiro.contains(touch.location(in: self))){
+        let internalRegion = internalPandeiro.contains(touch.location(in: self))
+        let pandeiroRegion = pandeiro.contains(touch.location(in: self))
+        
+        if(internalRegion){
+            print("BATEU NO INTERNO")
+            
+            let t  = currentNote.first
+            if(t != nil && t!.1 == true){  //caso esteja correto
+                print("CORRECT")
+                t!.0.removeFromParent()
+                currentNote.removeFirst()
+                
+                updateMultiplier(rightNote: true)
+                score += 50 * multiplier
+                scoreLabel.text = "\(score)"
+                
+            }else{  //caso não esteja correto
+                print("WRONG")
+                updateMultiplier(rightNote: false)
+            }
+        }
+        else if(pandeiroRegion){
+            print("REGIAO DO CANTO")
+            
+            
             let t  = currentNote.first
             if(t != nil && t!.1 == true){  //caso esteja correto
                 print("CORRECT")
@@ -86,6 +112,16 @@ class GameScene: SKScene {
         }
     }
     
+    func createPandeiroRegions(){
+        internalPandeiro = SKShapeNode(circleOfRadius: 60)
+        internalPandeiro.position = CGPoint(x: 2, y: -93)
+        internalPandeiro.glowWidth = 1.0
+        internalPandeiro.strokeColor = .black
+        internalPandeiro.fillColor = .black
+        internalPandeiro.zPosition = 10
+        
+        self.addChild(internalPandeiro)
+    }
     func startMusic(){
         var int : Double = 1
         
@@ -156,6 +192,7 @@ class GameScene: SKScene {
         let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
         view?.presentScene(endScene, transition: reveal)
     }
+    
     
     func hexStringToUIColor (hex:String) -> UIColor {
         //retirei da internet pronto
