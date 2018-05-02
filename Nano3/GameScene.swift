@@ -41,6 +41,9 @@ class GameScene: SKScene {
         path.move(to: CGPoint(x: 0, y: 0))
         path.addLine(to: CGPoint(x: -1000, y: 0))
         
+        //settando labels
+        
+        
         //ligando os sprites com as categorias de colisão
         rightTrigger.physicsBody?.categoryBitMask = rightCategory
         wrongTrigger.physicsBody?.categoryBitMask = wrongCategory
@@ -81,6 +84,11 @@ class GameScene: SKScene {
         createNote(interval: 0.25, type: "note1", &int)
         createNote(interval: 0.25, type: "note1", &int)
         createNote(interval: 0.25, type: "note1", &int)
+        
+        
+        //mostrando tela final
+        int += 10
+        Timer.scheduledTimer(timeInterval: int, target: self, selector: #selector(showEndScene), userInfo: nil, repeats: false)
     }
     func createNote(interval: Double, type: String,_ int: inout Double){
         var timer = Timer()
@@ -134,6 +142,12 @@ class GameScene: SKScene {
             blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
             alpha: CGFloat(1.0)
         )
+    }
+    @objc func showEndScene(){
+        guard let endScene = SKScene(fileNamed: "EndScene") else{return}
+        endScene.scaleMode = .aspectFit
+        let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
+        view?.presentScene(endScene, transition: reveal)
     }
     
 }
