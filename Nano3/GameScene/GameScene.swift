@@ -146,10 +146,9 @@ class GameScene: SKScene {
     }
     @objc func showNote(sender: Timer){
         
-        print(sender.userInfo! as! String)
         
-        _ = sender.userInfo as? String
-        let note1 : SKSpriteNode = SKSpriteNode(imageNamed: "note1")
+        let imageName = sender.userInfo as? String
+        let note1 : SKSpriteNode = SKSpriteNode(imageNamed: imageName!)
         note1.name = sender.userInfo as? String
         note1.size = CGSize(width: 64, height: 64)
         note1.anchorPoint = CGPoint(x: 0.5, y: 0.5)
@@ -196,7 +195,6 @@ class GameScene: SKScene {
         let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
         view?.presentScene(endScene, transition: reveal)
     }
-    
     
     func hexStringToUIColor (hex:String) -> UIColor {
         //retirei da internet pronto
