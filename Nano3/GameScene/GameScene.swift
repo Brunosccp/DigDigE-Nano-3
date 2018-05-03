@@ -51,6 +51,7 @@ class GameScene: SKScene {
         rightTrigger = childNode(withName: "rightTrigger") as! SKSpriteNode
         wrongTrigger = childNode(withName: "wrongTrigger") as! SKSpriteNode
         scoreLabel = childNode(withName: "score") as! SKLabelNode
+        multiplierLabel = childNode(withName: "multiplier") as! SKLabelNode
         //createPandeiroRegions()
         
         //criando o caminho da bola caminhante
@@ -65,6 +66,7 @@ class GameScene: SKScene {
         
         //settando labels
         scoreLabel.text = "\(GameScene.score)"
+        multiplierLabel.text = "\(multiplier)x"
         
         //ligando os sprites com as categorias de colisão
         rightTrigger.physicsBody?.categoryBitMask = rightCategory
@@ -111,6 +113,9 @@ class GameScene: SKScene {
         let pandeiro2Region = pandeiro2.contains(touch.location(in: self))
         
         if(pandeiroRegion){
+            clickAnimationPandeiro(whichPandeiro: 1)
+            
+            
             let t  = currentNote.first
             if(t != nil && t!.1 == true && t!.0.name! == "note1"){  //caso esteja correto
                 print("CORRECT, \(t!.0.name!)")
@@ -120,13 +125,17 @@ class GameScene: SKScene {
                 updateMultiplier(rightNote: true)
                 GameScene.score += 50 * multiplier
                 scoreLabel.text = "\(GameScene.score)"
+                multiplierLabel.text = "\(multiplier)x"
                 
             }else{  //caso não esteja correto
-                print("WRONG")
+                print("WRONG, pandeiro 1")
                 updateMultiplier(rightNote: false)
+                multiplierLabel.text = "\(multiplier)x"
             }
         }
         else if(pandeiro2Region){
+            clickAnimationPandeiro(whichPandeiro: 2)
+            
             let t  = currentNote.first
             if(t != nil && t!.1 == true && t!.0.name! == "note2"){  //caso esteja correto
                 print("CORRECT")
@@ -136,29 +145,64 @@ class GameScene: SKScene {
                 updateMultiplier(rightNote: true)
                 GameScene.score += 50 * multiplier
                 scoreLabel.text = "\(GameScene.score)"
+                multiplierLabel.text = "\(multiplier)x"
                 
             }else{  //caso não esteja correto
-                print("WRONG")
+                print("WRONG, pandeiro 2")
                 updateMultiplier(rightNote: false)
+                multiplierLabel.text = "\(multiplier)x"
             }
         }
     }
 
     
     func startMusic(){
-        var int : Double = 1
+        let bps : Double = 113/60
+        var int : Double = 1 + bps/4
         
-        //run(sound)
+        //começando o som
+        Timer.scheduledTimer(timeInterval: 4, target: self, selector: #selector(startSound), userInfo: nil, repeats: false)
         
-        createNote(interval: 1, type: "note2", &int)
-        createNote(interval: 0.5, type: "note1", &int)
-        createNote(interval: 1, type: "note1", &int)
-        createNote(interval: 0.25, type: "note1", &int)
-        createNote(interval: 0.25, type: "note1", &int)
-        createNote(interval: 0.25, type: "note1", &int)
+        //intro
+        for _ in 1...2{
+            createNote(interval: bps/4, type: "note2", &int)
+            
+            createNote(interval: bps*1.375, type: "note1", &int)
+            createNote(interval: bps/8, type: "note1", &int)
+            createNote(interval: bps/8, type: "note1", &int)
+            createNote(interval: bps/16, type: "note1", &int)
+            createNote(interval: bps/4, type: "note1", &int)
+            createNote(interval: bps/8, type: "note1", &int)
+            createNote(interval: bps/8, type: "note1", &int)
+            createNote(interval: bps/8, type: "note2", &int)
+            //int += bps/8
+        }
+        //resto
+            createNote(interval: bps/4, type: "note1", &int)
+            createNote(interval: bps/16, type: "note1", &int)
+            createNote(interval: bps/8, type: "note2", &int)
+            createNote(interval: bps/16, type: "note1", &int)
+            createNote(interval: bps/16, type: "note1", &int)
+            createNote(interval: bps/8, type: "note2", &int)
+            createNote(interval: bps/16, type: "note1", &int)
+            createNote(interval: bps/8, type: "note2", &int)
+        for _ in 1...50{
+            createNote(interval: bps/16, type: "note1", &int)
+            createNote(interval: bps/16, type: "note1", &int)
+            createNote(interval: bps/8, type: "note2", &int)
+            createNote(interval: bps/16, type: "note1", &int)
+            createNote(interval: bps/16, type: "note1", &int)
+            createNote(interval: bps/8, type: "note2", &int)
+            createNote(interval: bps/16, type: "note1", &int)
+            createNote(interval: bps/8, type: "note2", &int)
+            //createNote(interval: bps/4, type: "note1", &int)
+        }
+
+        
+        
         
         //mostrando tela final
-        int += 10
+        int += 5
         Timer.scheduledTimer(timeInterval: int, target: self, selector: #selector(showEndScene), userInfo: nil, repeats: false)
     }
     func createNote(interval: Double, type: String,_ int: inout Double){
@@ -184,7 +228,7 @@ class GameScene: SKScene {
         note1.physicsBody?.pinned = false
         
         //ligando a movimentação da nota caminhante com o caminho
-        let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: true, speed: 180)
+        let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: true, speed: 240)
         note1.run(move)
         
         self.addChild(note1)
@@ -216,8 +260,29 @@ class GameScene: SKScene {
         let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
         view?.presentScene(endScene, transition: reveal)
     }
-    
-    
+
+    @objc func startSound(sender: Timer){
+        player?.play()
+    }
+    func clickAnimationPandeiro(whichPandeiro: Int){
+        if(whichPandeiro == 1){
+            pandeiro.texture = SKTexture(imageNamed: "pandeiraoClick")
+            Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(changePandeiro), userInfo: 1, repeats: false)
+            
+        }else{
+            pandeiro2.texture = SKTexture(imageNamed: "pandeirao2Click")
+            Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(changePandeiro), userInfo: 2, repeats: false)
+        }
+    }
+    @objc func changePandeiro(sender: Timer){
+        let whichPandeiro = sender.userInfo as! Int
+        if(whichPandeiro == 1){
+            pandeiro.texture = SKTexture(imageNamed: "pandeirao")
+        }
+        else{
+            pandeiro2.texture = SKTexture(imageNamed: "pandeirao")
+        }
+    }
     func hexStringToUIColor (hex:String) -> UIColor {
         //retirei da internet pronto
         var cString:String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
