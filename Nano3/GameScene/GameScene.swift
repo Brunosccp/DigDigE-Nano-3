@@ -321,6 +321,7 @@ extension GameScene : SKPhysicsContactDelegate{
         if(bodyA == wrongCategory){ //quando a bola bate no segundo retangulo invisivel
             currentNote.removeFirst()
             updateMultiplier(rightNote: false)
+            multiplierLabel.text = "\(multiplier)x"
         }
     }
 }
