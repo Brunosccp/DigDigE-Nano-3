@@ -18,9 +18,8 @@ private var wrongTrigger: SKSpriteNode!
 
 private var currentNote : [(SKNode, Bool)] = []
 
-var sound = SKAction.playSoundFileNamed("dancaDaVassoura.mp3", waitForCompletion: false)
+var player: AVAudioPlayer?
 
-private var score: Int = 0
 private var multiplier: Int = 1
 private var multiplierCounter = 0
 private var firstNote = true
@@ -36,6 +35,9 @@ private var path = UIBezierPath()
 
 
 class GameScene: SKScene {
+    
+    static var score : Int = 0
+    
     override func didMove(to view: SKView) {
         //mudando cor de fundo
         self.backgroundColor = hexStringToUIColor(hex: "#ecc21b")
@@ -56,12 +58,13 @@ class GameScene: SKScene {
         path.addLine(to: CGPoint(x: -1000, y: 0))
         
         //resetando scores e multipliers
-        score = 0
+        GameScene.score = 0
         multiplier = 1
         multiplierCounter = 0
+        firstNote = true
         
         //settando labels
-        scoreLabel.text = "\(score)"
+        scoreLabel.text = "\(GameScene.score)"
         
         //ligando os sprites com as categorias de colisão
         rightTrigger.physicsBody?.categoryBitMask = rightCategory
@@ -74,6 +77,29 @@ class GameScene: SKScene {
         wrongTrigger.physicsBody?.collisionBitMask = 0
         
         self.physicsWorld.contactDelegate = self
+        
+        //carregando musica
+        guard let url = Bundle.main.url(forResource: "dancaDaVassoura", withExtension: "mp3") else { return }
+        
+        do {
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+            try AVAudioSession.sharedInstance().setActive(true)
+            
+            
+            
+            /* The following line is required for the player to work on iOS 11. Change the file type accordingly*/
+            player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileType.mp3.rawValue)
+            
+            /* iOS 10 and earlier require the following line:
+             player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileTypeMPEGLayer3) */
+            
+            guard let player = player else { return }
+            
+            player.play()
+            player.pause()
+        } catch let error {
+            print(error.localizedDescription)
+        }
         
         //começa musica
         startMusic()
@@ -92,8 +118,8 @@ class GameScene: SKScene {
                 currentNote.removeFirst()
                 
                 updateMultiplier(rightNote: true)
-                score += 50 * multiplier
-                scoreLabel.text = "\(score)"
+                GameScene.score += 50 * multiplier
+                scoreLabel.text = "\(GameScene.score)"
                 
             }else{  //caso não esteja correto
                 print("WRONG")
@@ -108,8 +134,8 @@ class GameScene: SKScene {
                 currentNote.removeFirst()
                 
                 updateMultiplier(rightNote: true)
-                score += 50 * multiplier
-                scoreLabel.text = "\(score)"
+                GameScene.score += 50 * multiplier
+                scoreLabel.text = "\(GameScene.score)"
                 
             }else{  //caso não esteja correto
                 print("WRONG")
@@ -222,7 +248,7 @@ extension GameScene : SKPhysicsContactDelegate{
         if(bodyA == rightCategory){ //quando a bola bate no primeiro retangulo invisivel
             currentNote.append((contact.bodyB.node!, true))
             if(firstNote == true){
-                run(sound)
+                player?.play()
                 firstNote = false
             }
             

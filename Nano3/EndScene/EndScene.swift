@@ -9,7 +9,15 @@
 import SpriteKit
 
 class EndScene : SKScene{
+    
+    var scoreLabel: SKLabelNode!
 
+    override func didMove(to view: SKView) {
+        scoreLabel = childNode(withName: "score") as! SKLabelNode
+        scoreLabel.text = "\(GameScene.score)"
+        
+    }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
         let location = touch?.location(in: self)
